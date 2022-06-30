@@ -1,0 +1,11 @@
+{:attributes
+ {:vonwig.testing/observation                      {:db.entity/attrs [:vonwig.testing.observation/id]}
+  :vonwig.testing.observation/id                   {:db/valueType    :db.type/string
+                                                    :db/cardinality  :db.cardinality/one
+                                                    :db/doc          "should be a random guid"}
+  :vonwig.testing.observation/webhook-value        {:db/valueType    :db.type/string
+                                                    :db/cardinality  :db.cardinality/one
+                                                    :db/doc          "some observation on a webhook"}
+  :vonwig.testing.observation/seen-by-subscriber   {:db/valueType    :db.type/boolean
+                                                    :db/cardinality  :db.cardinality/one
+                                                    :db/doc          "confirm that subscription fires"}}}
