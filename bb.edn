@@ -13,4 +13,4 @@
          -increment-version "0.1.0"
          register {:depends [docker-build docker-push -increment-version -increment-digest -bundle]
                     :task (shell {:dir "/Users/slim/atmhq/bb_scripts"} (format "bb cli register-skill --team AQ1K5FIKA --version %s" -increment-version))}
-         test-webhook (shell "curl https://slimslenderslacks:password@webhook.atomist.com/atomist/resource/9c8aa94d-9c14-4d68-a2c6-000c57232995 -d '{\"a\": \"b\"}' -H 'Content-Type: application/json'")}}
+         test-webhook (shell "curl https://slimslenderslacks:password@webhook.atomist.com/atomist/resource/db14277d-6b0a-40bf-b44e-12640d8399f4 -d '{\"a\": \"b\"}' -H 'Content-Type: application/json'")}}
