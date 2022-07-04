@@ -4,12 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "skill": "npm run skill:generate",
+    "skill:clean": "atm-skill clean",
+    "skill:generate": "atm-skill generate"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@atomist/skill-bundler": "^0.1.44"
+    "@atomist/skill": "^0.12.0-main.44"
   },
   "dependencies": {
     "@atomist/skill-entry-point": "^0.1.21",
