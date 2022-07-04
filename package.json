@@ -12,7 +12,7 @@
     "@atomist/skill-bundler": "^0.1.44"
   },
   "dependencies": {
-    "@atomist/skill-entry-point": "^0.1.21",
+    "@atomist/skill-entry-point": "^0.1.39",
     "uuid": "^8.3.2"
   }
 }

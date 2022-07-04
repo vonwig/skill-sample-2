@@ -2,24 +2,21 @@ const api = require("@atomist/skill-entry-point")
 const {v4 : uuidv4} = require("uuid")
 
 api.start(async payload => {
-  const tx = obj => {
-    return api.entitiesPayload(payload.correlation_id,api.prStr(obj))
-  }
-  payload.logger.info(`correlation id: ${payload.correlation_id}`)
-  if ("webhook_raw_payload" === payload.type) {
-    payload.publish(tx(
-      [{"schema/entity-type": "vonwig.testing/observation",
+  payload.logger.info(`execution id: ${payload["execution-id"]} with type ${payload.type}`)
+  if (!! payload.context.webhook) {
+    return payload.transact(
+      [{"schema/entity-type": new api.Keyword("vonwig.testing/observation"),
         "vonwig.testing.observation/id": uuidv4().toString(),
         "vonwig.testing.observation/seen-by-subscriber": false,
-        "vonwig.testing.observation/webhook-value": payload.webhook.body}]))
-      .then(r => {return {code: 0, reason: "created observation"}})
-  } else if ("on_observation.edn" === payload.subscription.result) {
-    payload.publish(tx(
+        "vonwig.testing.observation/webhook-value": payload.context.webhook.body}])
+      .then(_ => {return {state: "completed", reason: "created observation"}})
+  } else if ("subscription" == payload.type && "on_observation.edn" === payload.context.subscription.name) {
+    return payload.transact(
       [{"schema/entity-type": "vonwig.testing/observation",
-        "vonwig.testing.observation/id": payload.subscription.result[0][0].id,
-        "vonwig.testing.observation/seen-by-subscriber": true}]))
-      .then(r => {return {code: 0, reason: "update observation"}})
+        "vonwig.testing.observation/id": payload.context.subscription.result[0][0].id,
+        "vonwig.testing.observation/seen-by-subscriber": true}])
+      .then(_ => {return {state: "completed", reason: "update observation"}})
   } else {
-    return {code: 1, reason: "unrecognized"}
+    return {state: "failed", reason: "unrecognized"}
   }
 });
