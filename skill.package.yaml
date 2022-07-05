@@ -1,4 +1,4 @@
 apiVersion: 1
 package:
   type: atomist/container-skill
-  command: npm ci && npm run skill
+  command: atm-skill generate --no-validate
