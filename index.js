@@ -12,7 +12,7 @@ api.start(async payload => {
       .then(_ => {return {state: "completed", reason: "created observation"}})
   } else if ("subscription" == payload.type && "on_observation.edn" === payload.context.subscription.name) {
     return payload.transact(
-      [{"schema/entity-type": "vonwig.testing/observation",
+      [{"schema/entity-type": new api.Keyword("vonwig.testing/observation"),
         "vonwig.testing.observation/id": payload.context.subscription.result[0][0].id,
         "vonwig.testing.observation/seen-by-subscriber": true}])
       .then(_ => {return {state: "completed", reason: "update observation"}})
