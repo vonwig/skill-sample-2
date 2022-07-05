@@ -25,4 +25,4 @@ skill:
   artifacts:
     docker:
       - name: skill-sample-2
-        image: gcr.io/atomist-skill-production/skill-sample-2@sha256:dfa018c8d3f8146d49def03630b07f0867d29cbf4f3e960e108f7c2b81e42744
+        image: gcr.io/atomist-skill-production/skill-sample-2@sha256:64c40ab7f3e188d27497c7236d855afb3ccad3a3da4c3433689a9388fd3427b6
