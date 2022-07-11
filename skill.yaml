@@ -6,7 +6,7 @@ skill:
   description: Sample Skill written in JavaScript
   author: Atomist
   license: Apache-2.0
-  iconUrl: https://raw.githubusercontent.com/vonwig/skill-sample-2/main/docs/images/icon.svg
+  iconUrl: https://raw.githubusercontent.com/vonwig/skill-sample-2/main/icon.svg
   homepageUrl: https://github.com/vonwig/skill-sample-2
   longDescription: add a description
   parameters:
@@ -22,7 +22,3 @@ skill:
         required: false
         authorizationTypes:
           - httpBasic
-  artifacts:
-    docker:
-      - name: skill-sample-2
-        image: gcr.io/atomist-skill-production/skill-sample-2@sha256:16b021a7468a4c0d625f80fa84616ca45fd9e5b2a0dd2ec9a7ac4f90cae6212a

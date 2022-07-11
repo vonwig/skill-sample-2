@@ -1,16 +1,35 @@
-{:tasks {:requires ([clojure.string :as str])
-         docker-build (shell "docker build -t gcr.io/atomist-skill-production/skill-sample-2 .")
-         docker-push (shell "docker push gcr.io/atomist-skill-production/skill-sample-2")
-         -bundle (shell "atm-skill generate --no-validate")
-         -extract-digest (let [out (:out (shell {:out :string} "docker inspect --format '{{.RepoDigests}}' gcr.io/atomist-skill-production/skill-sample-2:latest"))
-                                 digest (second (re-find (re-pattern "\\[.*(sha256:.*)\\]") out)) ]
-                             (println "extracted " digest)
-                             digest)
+{:tasks {:requires ([clojure.string :as str]
+                    [babashka.fs :as fs])
+         :init (do
+                 (def repository "gcr.io/atomist-skill-production/skill-sample-2")
+                 (def team "AQ1K5FIKA")
+                 (def bb-scripts "/Users/slim/atmhq/bb_scripts")
+                 (def webhook "https://webhook.atomist.com/atomist/resource/db14277d-6b0a-40bf-b44e-12640d8399f4")
+                 (def webhook-basic-auth-username "slimslenderslacks")
+                 (def webhook-basic-auth-password "password"))
+         docker-build (shell (format "docker build -t %s ." repository))
+         docker-push (shell (format "docker push %s" repository))
+         -clean-dot-atomist (fs/delete-tree "./.atomist")
+         -bundle {:task (shell "atm-skill generate --no-validate --artifacts false")
+                  :depends [-clean-dot-atomist]}
+         -extract-digest (let [out (:out (shell {:out :string} (format "docker inspect --format '{{.RepoDigests}}' %s:latest" repository)))
+                               digest (second (re-find (re-pattern "\\[.*(sha256:.*)\\]") out))]
+                           (println "extracted " digest)
+                           digest)
          -increment-digest {:depends [-extract-digest]
-                            :task (let [s (slurp "./skill.yaml")
-                                        output (str/replace s (re-pattern "(image: .*@)(.*)") (format "$1%s" -extract-digest))]
-                                    (spit "skill.yaml" output))}        
-         -increment-version "0.1.35"
-         register {:depends [docker-build docker-push -increment-version -increment-digest -bundle]
-                    :task (shell {:dir "/Users/slim/atmhq/bb_scripts"} (format "bb cli register-skill --team AQ1K5FIKA --version %s" -increment-version))}
-         test-webhook (shell "curl https://slimslenderslacks:password@webhook.atomist.com/atomist/resource/db14277d-6b0a-40bf-b44e-12640d8399f4 -d '{\"a\": \"b\"}' -H 'Content-Type: application/json'")}}
+                            :task (let [s (slurp "./.atomist/skill.yaml")
+                                        output (str s (format "  artifacts:\n    docker:\n      - name: skill-sample-2\n        image: %s@%s\n" repository -extract-digest))]
+                                    (spit "./.atomist/skill.yaml" output))}
+         -increment-version (let [[_ a b c] (re-find (re-pattern "(.*)\\.(.*)\\.(.*)") (str/trim (slurp "version.txt")))
+                                  major (Integer/parseInt a)
+                                  minor (Integer/parseInt b)
+                                  patch (Integer/parseInt c)
+                                  v (format "%d.%d.%d" major minor (inc patch))]
+                              (println "new version " v)
+                              (spit "version.txt" v)
+                              v)
+         register {:depends [docker-build docker-push -increment-version -bundle -increment-digest]
+                   :task (let [basedir (str (fs/path (fs/file (System/getenv "PWD"))))] 
+                           (shell {:dir bb-scripts} (format "bb cli register-skill --team %s --version %s --basedir %s" team -increment-version basedir)))}
+         test-webhook (shell (format "curl %s -X POST -u %s:%s -d '{\"a\": \"b\"}' -H 'Content-Type: application/json'" 
+                                     webhook webhook-basic-auth-username webhook-basic-auth-password))}}
