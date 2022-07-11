@@ -6,5 +6,6 @@ WORKDIR /skill
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY index.js ./
+COPY icon.svg /
 
 ENTRYPOINT ["node", "index.js"]
