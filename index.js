@@ -3,7 +3,7 @@ const {v4 : uuidv4} = require("uuid")
 
 api.start(async payload => {
   payload.logger.info(`execution id: ${payload["execution-id"]} with type ${payload.type}`)
-  payload.logger.info("v1")
+  payload.logger.info("v2")
   if (!! payload.context.webhook) {
     return payload.transact(
       [{"schema/entity-type": new api.Keyword("vonwig.testing/observation"),
