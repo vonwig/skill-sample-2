@@ -7,3 +7,4 @@
 | package.json/package-lock.json | this Dockerfile uses Node to handle the payload |
 | datalog/subscription/*.edn | subscription definitions |
 | index.js | event handler |
+ 
