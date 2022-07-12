@@ -16,20 +16,26 @@
                                digest (second (re-find (re-pattern "\\[.*(sha256:.*)\\]") out))]
                            (println "extracted " digest)
                            digest)
-         -increment-digest {:depends [-extract-digest]
-                            :task (let [s (slurp "./.atomist/skill.yaml")
-                                        output (str s (format "  artifacts:\n    docker:\n      - name: skill-sample-2\n        image: %s@%s\n" repository -extract-digest))]
-                                    (spit "./.atomist/skill.yaml" output))}
-         -increment-version (let [[_ a b c] (re-find (re-pattern "(.*)\\.(.*)\\.(.*)") (str/trim (slurp "version.txt")))
-                                  major (Integer/parseInt a)
-                                  minor (Integer/parseInt b)
-                                  patch (Integer/parseInt c)
-                                  v (format "%d.%d.%d" major minor (inc patch))]
-                              (println "new version " v)
-                              (spit "version.txt" v)
-                              v)
-         register {:depends [docker-build docker-push -increment-version -bundle -increment-digest]
-                   :task (let [basedir (str (fs/path (fs/file (System/getenv "PWD"))))] 
-                           (shell {:dir bb-scripts} (format "bb cli register-skill --team %s --version %s --basedir %s" team -increment-version basedir)))}
-         test-webhook (shell (format "curl %s -X POST -u %s:%s -d '{\"a\": \"b\"}' -H 'Content-Type: application/json'" 
+         -increment-skill-yaml-image-digest {:depends [-extract-digest]
+                                             :task (let [s (slurp "./.atomist/skill.yaml")
+                                                         output (str s (format "  artifacts:\n    docker:\n      - name: skill-sample-2\n        image: %s@%s\n" repository -extract-digest))]
+                                                     (spit "./.atomist/skill.yaml" output))}
+         -describe (:out (shell {:out :string} "git describe --tags"))
+         -increment-version {:depends [-describe]
+                             :task (let [[_ a b c] (re-find (re-pattern "v?(\\d+)\\.(\\d+)\\.(\\d+)") (str/trim -describe))
+                                         major (Integer/parseInt a)
+                                         minor (Integer/parseInt b)
+                                         patch (Integer/parseInt c)
+                                         v (format "%d.%d.%d" major minor (inc patch))]
+                                     (println "new version " v)
+                                     v)}
+         -increment-local-commit-counter (let [counter (if (fs/exists? "counter.txt")
+                                                         (inc (Integer/parseInt (str/trim (slurp "counter.txt"))))
+                                                         0)]
+                                           (spit "counter.txt" (pr-str counter))
+                                           counter)
+         register {:depends [docker-build docker-push -increment-version -bundle -increment-skill-yaml-image-digest -increment-local-commit-counter]
+                   :task (let [basedir (str (fs/path (fs/file (System/getenv "PWD"))))]
+                           (shell {:dir bb-scripts} (format "bb cli register-skill --team %s --version %s --basedir %s" team (format "%s-%s" -increment-version -increment-local-commit-counter) basedir)))}
+         test-webhook (shell (format "curl %s -X POST -u %s:%s -d '{\"a\": \"b\"}' -H 'Content-Type: application/json'"
                                      webhook webhook-basic-auth-username webhook-basic-auth-password))}}
