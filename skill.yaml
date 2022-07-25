@@ -1,9 +1,10 @@
 skill:
   apiVersion: v2
-  name: skill-sample-2
-  namespace: vonwig
-  displayName: "Sample Skill #2"
-  description: Sample Skill written in JavaScript
+  # override name/namespace to provide non-default names
+  # name: default-name-will-be-github-org-name
+  # namespace: default-name-will-be-github-repository-name
+  displayName: "Sample Skill #2 template"
+  description: Sample Skill transacts and subscribes to facts arriving via webhook
   author: Atomist
   license: Apache-2.0
   iconUrl: https://raw.githubusercontent.com/vonwig/skill-sample-2/main/icon.svg
